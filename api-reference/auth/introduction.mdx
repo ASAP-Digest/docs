@@ -1,0 +1,70 @@
+---
+title: "Authentication"
+description: "Overview of ASAP Digest authentication methods"
+---
+
+# Authentication Overview
+
+ASAP Digest provides several authentication mechanisms to ensure secure access to resources while providing a seamless user experience.
+
+## Authentication Methods
+
+### Server-to-Server Auto Login (V6)
+
+Our primary authentication mechanism is server-to-server auto login, which automatically authenticates users who are already logged into WordPress when they visit the SvelteKit application.
+
+<CardGroup cols={2}>
+  <Card title="WordPress Session Check" icon="arrow-right-to-arc" href="/api-reference/auth/wp-session-check">
+    SvelteKit endpoint to check for active WordPress sessions
+  </Card>
+  <Card title="Active Sessions API" icon="users" href="/api-reference/wordpress/active-sessions">
+    WordPress endpoint that returns active user sessions
+  </Card>
+</CardGroup>
+
+### Key Features
+
+- **No Cookie Dependency**: Unlike previous versions, V6 doesn't rely on cookies, eliminating cross-domain issues.
+- **Secure Secret Sharing**: Uses a shared secret for server-to-server authentication.
+- **Role-Based Access**: Configure which WordPress roles can trigger auto-login.
+- **Detailed Logging**: Comprehensive logging for debugging and monitoring.
+
+## Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant U as User Browser
+    participant S as SvelteKit Server
+    participant W as WordPress Server
+    
+    U->>S: 1. Visit SvelteKit App
+    S->>U: 2. Return HTML/JS
+    Note over U: 3. JS checks for<br/>existing session
+    U->>S: 4. POST /api/auth/check-wp-session
+    S->>W: 5. POST /wp-json/asap/v1/get-active-sessions
+    Note over W: 6. Query DB for<br/>active sessions
+    W->>S: 7. Return user data if found
+    Note over S: 8. Create Better Auth<br/>session if user found
+    S->>U: 9. Return success + session
+    Note over U: 10. Page refreshes<br/>with new session
+```
+
+## Implementation Guide
+
+For detailed implementation instructions, refer to:
+
+- [Auto Login V6 Overview](/md-docs/auto-login/auto-login-v6)
+- [Auto Login Developer Guide](/md-docs/auto-login/auto-login-developer-guide)
+
+## Security Considerations
+
+<Warning>
+The shared secret (`BETTER_AUTH_SECRET`) should be a strong random string of at least 32 characters, and should never be exposed in client-side code.
+</Warning>
+
+In production environments, we recommend:
+
+- Using HTTPS for all communications
+- Implementing rate limiting
+- Configuring IP restrictions for WordPress endpoints
+- Regularly rotating the shared secret 

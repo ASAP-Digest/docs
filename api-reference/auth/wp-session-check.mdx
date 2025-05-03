@@ -1,0 +1,63 @@
+---
+title: "WordPress Session Check"
+description: "Automatically authenticate users with active WordPress sessions"
+openapi: "POST /api/auth/check-wp-session"
+---
+
+## Overview
+
+The WordPress Session Check endpoint provides true server-to-server communication between SvelteKit and WordPress. This endpoint allows automatic authentication of users with active WordPress sessions without requiring cookies.
+
+<Note>
+This feature is part of the V6 auto-login implementation that replaced the previous cookie-based approach.
+</Note>
+
+## Use Cases
+
+- **Seamless Authentication**: Automatically log users into SvelteKit when they're already logged into WordPress
+- **Cross-Domain Login**: Works across different domains without CORS issues
+- **Improved Security**: Uses server-to-server communication with shared secrets instead of cookies
+
+## Implementation Example
+
+Here's how to call this endpoint from the frontend:
+
+```javascript
+async function checkWordPressSession() {
+  try {
+    const response = await fetch('/api/auth/check-wp-session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        clientTimestamp: Date.now(),
+        clientInfo: {
+          url: window.location.href,
+          userAgent: navigator.userAgent,
+          clientId: localStorage.getItem('asap_client_id') || 'unknown'
+        }
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      console.log('Auto-login successful!', data.user);
+      return true;
+    } else {
+      console.warn('Auto-login failed:', data.error, data.details);
+      return false;
+    }
+  } catch (error) {
+    console.error('Error during auto-login check:', error);
+    return false;
+  }
+}
+```
+
+## Additional Resources
+
+- [Auto Login V6 Overview](/md-docs/auto-login/auto-login-v6)
+- [Auto Login Developer Guide](/md-docs/auto-login/auto-login-developer-guide)
+- [Auto Login API Reference](/md-docs/auto-login/auto-login-api) 

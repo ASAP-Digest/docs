@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
+  "theme": "willow",
   "name": "Mint Starter Kit",
   "colors": {
     "primary": "#16A34A",
@@ -50,6 +50,19 @@
               "api-reference/endpoint/create",
               "api-reference/endpoint/delete",
               "api-reference/endpoint/webhook"
+            ]
+          },
+          {
+            "group": "Authentication",
+            "pages": [
+              "api-reference/auth/introduction",
+              "api-reference/auth/wp-session-check"
+            ]
+          },
+          {
+            "group": "WordPress Integration",
+            "pages": [
+              "api-reference/wordpress/active-sessions"
             ]
           }
         ]

@@ -1,0 +1,105 @@
+---
+title: "Active Sessions API"
+description: "WordPress endpoint to provide active user sessions via server-to-server communication"
+---
+
+## Endpoint Details
+
+<CodeGroup>
+```json URL
+/wp-json/asap/v1/get-active-sessions
+```
+
+```bash Request Example
+curl -X POST \
+  https://asapdigest.example.com/wp-json/asap/v1/get-active-sessions \
+  -H 'Content-Type: application/json' \
+  -H 'X-ASAP-Sync-Secret: your-shared-secret-here' \
+  -H 'X-ASAP-Client-IP: 127.0.0.1' \
+  -H 'X-ASAP-Request-Source: curl-example' \
+  -d '{
+    "requestSource": "documentation-example",
+    "timestamp": 1714968422000
+  }'
+```
+
+```json Response Example
+{
+  "success": true,
+  "activeSessions": [
+    {
+      "wpUserId": 1,
+      "username": "admin",
+      "email": "admin@example.com",
+      "displayName": "Administrator",
+      "firstName": "Admin",
+      "lastName": "User",
+      "roles": ["administrator"],
+      "metadata": {
+        "registered": "2023-01-01 00:00:00",
+        "nicename": "admin"
+      }
+    }
+  ],
+  "timestamp": 1714968422
+}
+```
+</CodeGroup>
+
+## Overview
+
+The Active Sessions API provides a server-to-server endpoint for discovering active WordPress user sessions. Unlike traditional cookie-based approaches, this endpoint directly queries the WordPress database for session data, making it more reliable for cross-domain authentication.
+
+<Warning>
+This endpoint requires a shared secret for authentication. Never expose this secret in client-side code.
+</Warning>
+
+## Authentication
+
+All requests to this endpoint **must** include the `X-ASAP-Sync-Secret` header with the shared secret value configured in your WordPress environment. This secret is defined with the `BETTER_AUTH_SECRET` constant in your WordPress configuration.
+
+## Request Parameters
+
+<ParamField body="requestSource" type="string" required>
+  An identifier for the source of the request (e.g., "svelte-kit-server")
+</ParamField>
+
+<ParamField body="timestamp" type="number" required>
+  The current timestamp in milliseconds
+</ParamField>
+
+<ParamField body="serverInfo" type="object">
+  Optional server information for debugging purposes
+</ParamField>
+
+## Response Format
+
+<ResponseField name="success" type="boolean" required>
+  Indicates whether the operation was successful
+</ResponseField>
+
+<ResponseField name="activeSessions" type="array">
+  Array of user objects with active WordPress sessions
+</ResponseField>
+
+<ResponseField name="timestamp" type="number">
+  Server timestamp when the response was generated
+</ResponseField>
+
+<ResponseField name="error" type="string">
+  Error message if success is false
+</ResponseField>
+
+## Error Codes
+
+| Error Code | Description | HTTP Status |
+|------------|-------------|------------|
+| `unauthorized` | Invalid or missing sync secret | 401 |
+| `no_active_wp_sessions` | No active WordPress sessions found | 200 |
+| `no_eligible_active_sessions` | Active sessions found but not with required roles | 200 |
+
+## Additional Resources
+
+- [Auto Login V6 Overview](/md-docs/auto-login/auto-login-v6)
+- [Auto Login API Reference](/md-docs/auto-login/auto-login-api)
+- [Server-to-Server Communication Guide](/md-docs/auto-login/auto-login-developer-guide) 
